@@ -12,6 +12,7 @@ import sys
 import os
 import yaml
 import hashlib
+import six
 from rstblog.signals import before_template_rendered
 from StringIO import StringIO
 from docutils import core
@@ -103,6 +104,14 @@ def enhance_template_context(template, context):
             comment = comment_meta.copy()
             comment['body'] = rest_to_html_fragment('\n'.join(comment_body))
             context['ctx'].comments.append(comment)
+            # add gravatar image
+            use_gravatar = context['config'].get('cacause_gravatar')
+            if use_gravatar:
+                email = comment_meta['email']
+                email_bytes = six.b(email).lower() if email else ''
+                gravatar_url = "http://www.gravatar.com/avatar/%s" % \
+                        hashlib.md5(email_bytes).hexdigest()
+                comment['gravatar'] = gravatar_url
 
 
 def setup(builder):
